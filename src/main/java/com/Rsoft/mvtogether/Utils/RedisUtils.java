@@ -232,6 +232,11 @@ public class RedisUtils {
               if (Long.parseLong(redisTemplate.opsForValue().get(key).toString())
                   >= DurationSeconds) {
                 redisTemplate.delete(key + "inuse");
+                //删除 <roomNum>
+                //删除 <-roomNum-MvNum>
+                //删除<ownerName>
+                //删除<customerName>
+                //删除 数据库本房间信息
                 timer.cancel();
               }
             }
