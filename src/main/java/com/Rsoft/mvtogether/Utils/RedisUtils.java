@@ -192,8 +192,8 @@ public class RedisUtils {
   private String useScriptIncr(String key, long expireseconds) {
     StringBuilder script =
         new StringBuilder(
-            " local current = redis.call('incr',KEYS[1]); "
-                + " local t = redis.call('ttl',KEYS[1]); ");
+            " local current = redis.call('incr',KEYS[1]);local current = redis.call('incr',KEYS[1]);local current = redis.call('incr',KEYS[1]);"
+               );
     DefaultRedisScript redisScript = new DefaultRedisScript();
     redisScript.setScriptText(script.toString());
     redisTemplate.execute(redisScript, Arrays.asList(new String[] {key}), expireseconds);
@@ -223,7 +223,7 @@ public class RedisUtils {
             }
           },
           4000,
-          1000);
+          3000);
       timer.schedule(
           new TimerTask() {
             @Override
@@ -237,7 +237,7 @@ public class RedisUtils {
             }
           },
           1000 , // 延迟秒检查
-          1000 * 60 * 60); // 一小时一检查
+          1000 * 60 * 10); // 10min一检查
     }
   }
 }
