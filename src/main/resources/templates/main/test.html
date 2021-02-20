@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title></title>
+    <script src="js/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript">
+
+        $(function () {
+            AddSth();
+        });
+        $(function () {
+            $(".main").unbind("scroll").bind("scroll", function (e) {
+                var sum = this.scrollHeight;
+                if (sum <= $(this).scrollTop() + $(this).height()) {
+                    AddSth();
+                }
+            });
+        });
+
+        function AddSth() {
+
+            $.ajax({
+                type: 'POST',
+                url: "api-v1/getMvList",
+                data: {
+                    page: $(".main").attr("id")
+                },
+                success: function (result) {
+
+
+                    console.log(result[0].mvNum);
+                    json = result;
+                    for (var i in json) {
+                        var tbBody = "<ul><li>" + json[i].mvName + "</li></ul>";
+                        $(".main").append(tbBody);
+                    }
+                    $(".main").append("<hr />");
+                    let page = $(".main").attr("id");
+                    page = Number(page) + Number(1);
+                    $(".main").attr("id", page);
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+<form id="form1" runat="server">
+    <div>下拉加载更多</div>
+    <br/>
+    <div class="main" style="border: 1px solid red; height:50px; overflow: auto;" id="0" onclick="AddSth()"></div>
+</form>
+</body>
+</html>

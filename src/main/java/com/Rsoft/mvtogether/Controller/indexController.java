@@ -52,4 +52,9 @@ public class indexController {
   public String chooseMv() {
     return "main/chooseMv";
   }
+
+  @GetMapping("/go")
+  public String go() {
+    return "main/test";
+  }
 }

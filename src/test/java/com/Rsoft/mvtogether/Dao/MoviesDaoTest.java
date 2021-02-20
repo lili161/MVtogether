@@ -33,9 +33,7 @@ private MoviesDao moviesDao;
 
   @Test
   void getAllMovies() {
-    for (Movies movie : moviesDao.getAllMovies()) {
-      System.out.println(movie.toString());
-    }
+
     ;
   }
 

@@ -76,16 +76,19 @@
 
                 <form id="form1" name="form1" method="post">
 
-                    <label for="select">选择云端电影:</label>
-                    <select name="select" id="select">
-                        <option value="test1">请选择要预订的电影</option>
+                    <label>选择云端电影:</label>
+                    <select name="select" class="main" id="films">
+                        <option value="null">请选择要预订的电影</option>
+
                     </select>
+
                     <br/>
                     <p>或</p>
                     <label for="textfield">链接预订:</label>
-                    <input name="textfield" type="text" id="textfield" maxlength="500">
+                    <input name="textfield" type="text" id="textfield" maxlength="500" placeholder="暂不可用"
+                           disabled="disabled">
                     <br/>
-                    <button type="button" class="btn btn-info btn-sm">点击申请</button>
+                    <button type="button" class="btn btn-info btn-sm" id="apply">点击申请</button>
                 </form>
 
             </div>
@@ -104,10 +107,18 @@
     </div>
     <hr>
 </div>
+
 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 <script src="js/jquery-1.11.3.min.js"></script>
+<script type="text/javascript">
 
+    $(function () {
+        AddSth();
+    });
+
+</script>
 <!-- Include all compiled plugins (below), or include individual files as needed -->
 <script src="js/bootstrap.js"></script>
+<script src="js/all-of-you.min.js"></script>
 </body>
 </html>
