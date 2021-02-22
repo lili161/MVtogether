@@ -6,18 +6,25 @@ import com.Rsoft.mvtogether.Entity.Viewer;
 import com.Rsoft.mvtogether.Service.progress;
 import com.Rsoft.mvtogether.Utils.RedisUtils;
 import com.Rsoft.mvtogether.Utils.checkString;
+//import com.Rsoft.mvtogether.Utils.kafkaConsumer;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpSession;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author LR
  * @date 2021/2/17 交流可加qq群 1027263551
  */
+@Slf4j
 @Controller
 public class apisController {
     //
@@ -26,30 +33,7 @@ public class apisController {
     @Autowired
     private progress progress;
 
-    //  @Autowired
-    //  private checkString checkString;
-    //    @GetMapping("/test")
-    //    @ResponseBody
-    //    public String   test(){
-    //        try{
-    //        return  redisUtils.get("second").toString();
-    //        }catch (NullPointerException e){
-    //            return "NULL";
-    //        }
-    //    }
-    //    @GetMapping("/add")
-    //    @ResponseBody
-    //    public String increase(){
-    //        progress.beginProgress("second",1000,1);
-    ////        redisUtils.increasePerSecond("second",1000,14400);
-    //        return "OK";
-    //    }
-    //    @GetMapping("/reset")
-    //    @ResponseBody
-    //    public  String reset(){
-    //        progress.setZeroProgress("second");
-    //        return "reset";
-    //    }
+
     @ResponseBody
     @PostMapping("/api-v1/verify")
     public String checkIfbooked(String name, HttpSession session) {
@@ -58,8 +42,12 @@ public class apisController {
             if (result == 0) {
                 return Constant.NotBooked;
             } else if (result == 1) {
+                Viewer viewer = (Viewer) session.getAttribute(Constant.roomInfo);
+                redisUtils.set(viewer.getOwnerName(), 1);
                 return Constant.BookedAsOwner;
             } else {
+                Viewer viewer = (Viewer) session.getAttribute(Constant.roomInfo);
+                redisUtils.set(viewer.getCustomerName(), 1);
                 return Constant.BookedAsCustomer;
             }
         } else {
@@ -106,5 +94,23 @@ public class apisController {
     @PostMapping("api-v1/getAllMvList")
     public List<Movies> getAllMvList() {
         return progress.getMvList();
+    }
+
+    @ResponseBody
+    @PostMapping("api-v1/isAllIn")
+    public String isAllIn(HttpSession session) throws InterruptedException {
+        Viewer viewer = (Viewer) session.getAttribute(Constant.roomInfo);
+        int count = 0;
+        while (progress.isAllIn(viewer.getOwnerName(), viewer.getCustomerName()) != 1) {
+            count++;
+            if (count >= 4)
+                break;
+            TimeUnit.SECONDS.sleep(1);
+        }
+        if (progress.isAllIn(viewer.getOwnerName(), viewer.getCustomerName()) == 1)
+            return Constant.AllIn;
+        else
+            return Constant.NotAllIn;
+
     }
 }

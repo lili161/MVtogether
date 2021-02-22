@@ -31,4 +31,7 @@ public interface progress {
     List<Movies> getMvList(String page);
 
     List<Movies> getMvList();
+
+    //俩人是否都进来了  0 没有  1 进来了
+    int isAllIn(String myName, String youName);
 }

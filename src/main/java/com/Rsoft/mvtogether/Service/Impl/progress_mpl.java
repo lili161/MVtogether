@@ -91,4 +91,12 @@ public class progress_mpl implements progress {
   public List<Movies> getMvList() {
     return moviesDao.getAllMovies();
   }
+
+  @Override
+  public int isAllIn(String myName, String youName) {
+    if (null != redisUtils.get(myName) && null != redisUtils.get(youName))
+      return 1;
+    else
+      return 0;
+  }
 }

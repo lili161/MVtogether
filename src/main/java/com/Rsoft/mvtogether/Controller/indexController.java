@@ -1,5 +1,9 @@
 package com.Rsoft.mvtogether.Controller;
 
+import com.Rsoft.mvtogether.Constant.Constant;
+import com.Rsoft.mvtogether.Entity.Viewer;
+import com.Rsoft.mvtogether.Utils.RedisUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -11,6 +15,9 @@ import javax.servlet.http.HttpSession;
  */
 @Controller
 public class indexController {
+  @Autowired
+  private RedisUtils redisUtils;
+
   @GetMapping("/index")
   public String index() {
     return "main/index";
@@ -44,7 +51,17 @@ public class indexController {
   }
 
   @GetMapping("/wait")
-  public String waiting() {
+  public String waiting(HttpSession session) {
+    Viewer viewer = (Viewer) session.getAttribute(Constant.roomInfo);
+    String ownerName = viewer.getOwnerName();
+    String customerName = viewer.getCustomerName();
+    int isOwner = viewer.getIsOwner();
+    if (null != redisUtils.get(ownerName) && null != redisUtils.get(customerName)) {
+      if (isOwner == 1)
+        return "main/ownerWatch";
+      else
+        return "main/customerWatch";
+    }
     return "main/waitFriend";
   }
 
