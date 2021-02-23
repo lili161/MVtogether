@@ -20,5 +20,7 @@ public class Constant {
     public static final String ChangeMvNumSuccess = "change-success";
     public static final String AllIn = "all-in";
     public static final String NotAllIn = "not-all-in";
+    public static final String MovieName = "mvName";
+    public static final String MovieUrl = "mvUrl";
 
 }

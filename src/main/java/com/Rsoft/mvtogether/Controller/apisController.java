@@ -18,6 +18,7 @@ import javax.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -112,5 +113,18 @@ public class apisController {
         else
             return Constant.NotAllIn;
 
+    }
+
+    @ResponseBody
+    @PostMapping("api-v1/getMvName")
+    public String getMvName(HttpSession session) {
+        return progress.getMvName(session);
+    }
+
+    @ResponseBody
+    @PostMapping("api-v1/getMvURL")
+    public void sessionAddUrl(HttpSession session) {
+        Viewer viewer = (Viewer) session.getAttribute(Constant.roomInfo);
+        session.setAttribute(Constant.MovieUrl, progress.getUrl(viewer.getMvNum()));
     }
 }

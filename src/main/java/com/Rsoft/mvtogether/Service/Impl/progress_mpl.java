@@ -99,4 +99,16 @@ public class progress_mpl implements progress {
     else
       return 0;
   }
+
+  @Override
+  public String getUrl(String MvNum) {
+    return moviesDao.getUrlByNum(MvNum);
+  }
+
+  @Override
+  public String getMvName(HttpSession session) {
+    Viewer viewer = (Viewer) session.getAttribute(Constant.roomInfo);
+    return moviesDao.getNameByNum(viewer.getMvNum());
+
+  }
 }

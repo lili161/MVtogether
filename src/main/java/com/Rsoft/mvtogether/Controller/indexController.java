@@ -2,6 +2,7 @@ package com.Rsoft.mvtogether.Controller;
 
 import com.Rsoft.mvtogether.Constant.Constant;
 import com.Rsoft.mvtogether.Entity.Viewer;
+import com.Rsoft.mvtogether.Service.progress;
 import com.Rsoft.mvtogether.Utils.RedisUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -15,18 +16,22 @@ import javax.servlet.http.HttpSession;
  */
 @Controller
 public class indexController {
-  @Autowired
-  private RedisUtils redisUtils;
+    @Autowired
+    private RedisUtils redisUtils;
+    @Autowired
+    private progress progress;
+    @Autowired
+    private apisController apisController;
 
-  @GetMapping("/index")
-  public String index() {
-    return "main/index";
-  }
+    @GetMapping("/index")
+    public String index() {
+        return "main/index";
+    }
 
-  @GetMapping("/")
-  public String indexvoid() {
-    return "main/index";
-  }
+    @GetMapping("/")
+    public String indexvoid() {
+        return "main/index";
+    }
 
   @GetMapping("/bookMv")
   public String bookMv() {
@@ -45,9 +50,24 @@ public class indexController {
 
   @GetMapping("/watch")
   public String watch(HttpSession session) {
-    //        String name = session.getAttribute("Name").toString();
-    // 查询是房主 还是 客人 之后返回响应的房间
-    return "main/ownerWatch";
+      //        String name = session.getAttribute("Name").toString();
+      // 查询是房主 还是 客人 之后返回响应的房间
+      Viewer viewer = (Viewer) session.getAttribute(Constant.roomInfo);
+      session.setAttribute(Constant.MovieName, progress.getMvName(session));
+      String roomNum = "room" + viewer.getMvNum();
+      String mvName = roomNum + "MvNum";
+      if (null == redisUtils.get(roomNum)) {
+          redisUtils.set(roomNum, 0);
+      }
+      if (null == redisUtils.get(mvName)) {
+          redisUtils.set(mvName, viewer.getMvNum());
+      }
+      apisController.sessionAddUrl(session);
+      if (viewer.getIsOwner() == 1) {
+          return "main/ownerWatch";
+      } else {
+          return "main/customerWatch";
+      }
   }
 
   @GetMapping("/wait")
@@ -57,10 +77,11 @@ public class indexController {
     String customerName = viewer.getCustomerName();
     int isOwner = viewer.getIsOwner();
     if (null != redisUtils.get(ownerName) && null != redisUtils.get(customerName)) {
-      if (isOwner == 1)
-        return "main/ownerWatch";
-      else
-        return "main/customerWatch";
+//      if (isOwner == 1)
+//        return "main/ownerWatch";
+//      else
+//        return "main/customerWatch";.
+        return watch(session);
     }
     return "main/waitFriend";
   }
