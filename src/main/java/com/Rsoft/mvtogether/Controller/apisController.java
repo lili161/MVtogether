@@ -6,19 +6,23 @@ import com.Rsoft.mvtogether.Entity.Viewer;
 import com.Rsoft.mvtogether.Service.progress;
 import com.Rsoft.mvtogether.Utils.RedisUtils;
 import com.Rsoft.mvtogether.Utils.checkString;
-//import com.Rsoft.mvtogether.Utils.kafkaConsumer;
+import com.Rsoft.mvtogether.Utils.fileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpSession;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.Vector;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -33,8 +37,16 @@ public class apisController {
     private RedisUtils redisUtils;
     @Autowired
     private progress progress;
+    @Value("${mv_addr}")
+    private String uploadAddr;
+    @Value("${mv_file_ipAddr}")
+    private String remote_ip;
 
 
+    /*检查 此用户是否已经预订
+     *
+     * 返回 未预订  主人预定  客人预订
+     * */
     @ResponseBody
     @PostMapping("/api-v1/verify")
     public String checkIfbooked(String name, HttpSession session) {
@@ -76,6 +88,7 @@ public class apisController {
         }
     }
 
+    /*换电影*/
     @ResponseBody
     @PostMapping("/api-v1/changeMvNum")
     public String changeMvNum(String MvNum, HttpSession session) {
@@ -85,18 +98,21 @@ public class apisController {
         return Constant.ChangeMvNumSuccess;
     }
 
+    /*获取电影列表*/
     @ResponseBody
     @PostMapping("api-v1/getMvList")
     public List<Movies> getMvList(String page) {
         return progress.getMvList(page);
     }
 
+    /*获取全部列表*/
     @ResponseBody
     @PostMapping("api-v1/getAllMvList")
     public List<Movies> getAllMvList() {
         return progress.getMvList();
     }
 
+    /*是否全部进入*/
     @ResponseBody
     @PostMapping("api-v1/isAllIn")
     public String isAllIn(HttpSession session) throws InterruptedException {
@@ -115,16 +131,42 @@ public class apisController {
 
     }
 
+    /*获取电影名*/
     @ResponseBody
     @PostMapping("api-v1/getMvName")
     public String getMvName(HttpSession session) {
         return progress.getMvName(session);
     }
 
+    /*获取电影地址*/
     @ResponseBody
     @PostMapping("api-v1/getMvURL")
     public void sessionAddUrl(HttpSession session) {
         Viewer viewer = (Viewer) session.getAttribute(Constant.roomInfo);
         session.setAttribute(Constant.MovieUrl, progress.getUrl(viewer.getMvNum()));
     }
+
+    /*同步*/
+    @ResponseBody
+    @PostMapping("api-v1/sync")
+    public String sync(HttpSession session) {
+        Viewer viewer = (Viewer) session.getAttribute(Constant.roomInfo);
+        return progress.sync(viewer.getRoomNum());
+    }
+
+    /*上传文件*/
+    @ResponseBody
+    @PostMapping("api-v1/uploadFile")
+    public String uploadFiles(@RequestParam("file") MultipartFile file) throws IOException {
+        String MvCode = UUID.randomUUID().toString();
+        String path = uploadAddr + MvCode + fileUtil.getFileExtend(Objects.requireNonNull(file.getOriginalFilename()));
+        String remotePath = remote_ip + MvCode + fileUtil.getFileExtend(Objects.requireNonNull(file.getOriginalFilename()));
+        File localFile = new File(path);
+        if (!localFile.getParentFile().exists())
+            localFile.mkdirs();
+        file.transferTo(localFile);
+        progress.addMv(file.getOriginalFilename(), remotePath);
+        return null;
+    }
 }
+

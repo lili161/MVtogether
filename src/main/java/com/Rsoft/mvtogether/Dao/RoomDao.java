@@ -26,7 +26,7 @@ public interface RoomDao {
 
     //修改房间的电影号
     @Update("update room set MvNum = #{MvNum} where roomNum = #{roomNum}")
-    public void changeMv(@Param("roomNum") String roomNum,@Param("MvNum") String MvNum);
+    public void changeMv(@Param("roomNum") String roomNum, @Param("MvNum") String MvNum);
 
     //根据房主名查询房间信息
     @Select("select * from room where ownerName =#{ownerName} limit 1")
@@ -35,4 +35,7 @@ public interface RoomDao {
     //根据客人名查询房间信息
     @Select("select * from room where customerName =#{customerName} limit 1")
     Viewer getInfoByCustomerName(@Param("customerName") String customerName);
+
+    @Delete("DELETE FROM room where ownerName = #{ownerName}")
+    void delRoomByOwnerName(@Param("ownerName") String ownerName);
 }

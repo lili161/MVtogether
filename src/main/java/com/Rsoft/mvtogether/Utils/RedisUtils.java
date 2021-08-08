@@ -1,5 +1,6 @@
 package com.Rsoft.mvtogether.Utils;
 
+import com.Rsoft.mvtogether.Dao.RoomDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.*;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -11,17 +12,21 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class RedisUtils {
-  @Autowired private RedisTemplate redisTemplate;
-  /**
-   * 写入缓存
-   *
-   * @param key
-   * @param value
-   * @return
-   */
-  public boolean set(final String key, Object value) {
-    boolean result = false;
-    try {
+    @Autowired
+    private RedisTemplate redisTemplate;
+    @Autowired
+    private RoomDao roomDao;
+
+    /**
+     * 写入缓存
+     *
+     * @param key
+     * @param value
+     * @return
+     */
+    public boolean set(final String key, Object value) {
+        boolean result = false;
+        try {
       ValueOperations<Serializable, Object> operations = redisTemplate.opsForValue();
       operations.set(key, value);
       result = true;
@@ -192,7 +197,7 @@ public class RedisUtils {
   private String useScriptIncr(String key, long expireseconds) {
     StringBuilder script =
         new StringBuilder(
-            " local current = redis.call('incr',KEYS[1]);local current = redis.call('incr',KEYS[1]);local current = redis.call('incr',KEYS[1]);"
+                " local current = redis.call('incr',KEYS[1]);local current = redis.call('incr',KEYS[1]);"
                );
     DefaultRedisScript redisScript = new DefaultRedisScript();
     redisScript.setScriptText(script.toString());
@@ -200,45 +205,51 @@ public class RedisUtils {
     return null;
   }
 
-  public void increasePerSecond(String key, long expireSeconds, long DurationSeconds) {
-    // 判断是否已经有线程在运行自增长
-    String inuse = key + "inuse";
-    String temp;
-    try {
-      temp = redisTemplate.opsForValue().get(inuse).toString();
-    } catch (NullPointerException e) {
-      temp = null;
-    }
+    public void increasePerSecond(String key, long expireSeconds, long DurationSeconds, String ownerName, String customerName) {
+        // 判断是否已经有线程在运行自增长
+//    String inuse = key + "inuse";
+        String inuse = key;
+        String temp;
+        try {
+            temp = redisTemplate.opsForValue().get(inuse).toString();
+        } catch (NullPointerException e) {
+            temp = null;
+        }
 
-    if (null == temp || temp.equals("0")) {
-      set(inuse, 1);
-      Timer timer = new Timer();
+        if (null == temp || temp.equals("0")) {
+            set(inuse, 1);
+            Timer timer = new Timer();
       timer.schedule(
-          new TimerTask() {
-            @Override
-            public void run() {
-              useScriptIncr(key, expireSeconds);
-              //
-              //                this.cancel();
-            }
-          },
-          4000,
-          3000);
-      timer.schedule(
-          new TimerTask() {
-            @Override
-            public void run() {
-              System.out.println("timer-2 is running");
-              if (Long.parseLong(redisTemplate.opsForValue().get(key).toString())
-                  >= DurationSeconds) {
-                redisTemplate.delete(key + "inuse");
-                //删除 <roomNum>
-                //删除 <-roomNum-MvNum>
-                //删除<ownerName>
-                //删除<customerName>
-                //删除 数据库本房间信息
-                timer.cancel();
-              }
+              new TimerTask() {
+                  @Override
+                  public void run() {
+                      useScriptIncr(key, expireSeconds);
+                      System.out.println("+2");
+                      //
+                      //                this.cancel();
+                  }
+              },
+              4000,
+              2000);
+            timer.schedule(
+                    new TimerTask() {
+                        @Override
+                        public void run() {
+                            System.out.println("timer-2 is running");
+                            if (Long.parseLong(redisTemplate.opsForValue().get(key).toString())
+                                    >= DurationSeconds) {
+                                redisTemplate.delete(key);
+                                redisTemplate.delete(key + "MvNum");
+                                redisTemplate.delete(ownerName);
+                                redisTemplate.delete(customerName);
+                                roomDao.delRoom(key);
+                                //删除 <roomNum>
+                                //删除 <-roomNum-MvNum>
+                                //删除<ownerName>
+                                //删除<customerName>
+                                //删除 数据库本房间信息
+                                timer.cancel();
+                            }
             }
           },
           1000 , // 延迟秒检查

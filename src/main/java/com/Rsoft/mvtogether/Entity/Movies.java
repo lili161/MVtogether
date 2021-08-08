@@ -1,5 +1,7 @@
 package com.Rsoft.mvtogether.Entity;
 
+import lombok.Data;
+
 import java.io.Serializable;
 
 /**
@@ -8,43 +10,14 @@ import java.io.Serializable;
  * 交流可加qq群 1027263551
  **/
 
+@Data
 public class Movies  implements Serializable {
+    /*电影号*/
     private String MvNum;
 
+    /*电影名*/
     private String MvName;
 
+    /*电影链接*/
     private String MvUrl;
-
-    public String getMvNum() {
-        return MvNum;
-    }
-
-    public void setMvNum(String mvNum) {
-        MvNum = mvNum;
-    }
-
-    public String getMvName() {
-        return MvName;
-    }
-
-    public void setMvName(String mvName) {
-        MvName = mvName;
-    }
-
-    public String getMvUrl() {
-        return MvUrl;
-    }
-
-    public void setMvUrl(String mvUrl) {
-        MvUrl = mvUrl;
-    }
-
-    @Override
-    public String toString() {
-        return "Movies{" +
-                "MvNum='" + MvNum + '\'' +
-                ", MvName='" + MvName + '\'' +
-                ", MvUrl='" + MvUrl + '\'' +
-                '}';
-    }
 }

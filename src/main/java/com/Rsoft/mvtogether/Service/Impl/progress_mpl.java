@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -27,8 +28,8 @@ public class progress_mpl implements progress {
   private MoviesDao moviesDao;
 
   @Override
-  public void beginProgress(String key, long expireSeconds, long DurationHours) {
-    redisUtils.increasePerSecond(key, expireSeconds, DurationHours * 60 * 60);
+  public void beginProgress(String key, long expireSeconds, long DurationHours, String ownerName, String customerName) {
+    redisUtils.increasePerSecond(key, expireSeconds, DurationHours * 60 * 60, ownerName, customerName);
   }
 
   @Override
@@ -110,5 +111,34 @@ public class progress_mpl implements progress {
     Viewer viewer = (Viewer) session.getAttribute(Constant.roomInfo);
     return moviesDao.getNameByNum(viewer.getMvNum());
 
+  }
+
+  @Override
+  public String sync(String roomNum) {
+    String MVbeginTime = redisUtils.get("room" + roomNum).toString();
+    String nowTime = new Date().toString();
+    int result = Integer.parseInt(nowTime) - Integer.parseInt(MVbeginTime);
+    /*大于五个小时  注销掉*/
+    if (result >= 18000000) {
+      redisUtils.remove("room" + roomNum);
+      result = 0;
+    }
+    return String.valueOf(result);
+  }
+
+  @Override
+  public String delRoomByName(String ownerName) {
+    roomDao.delRoom(ownerName);
+    return null;
+  }
+
+  @Override
+  public int addMv(String movieName, String url) {
+    try {
+      moviesDao.addMv(movieName, url);
+      return 1;
+    } catch (Exception e) {
+      return 0;
+    }
   }
 }

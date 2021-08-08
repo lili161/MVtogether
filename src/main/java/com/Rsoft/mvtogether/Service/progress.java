@@ -11,7 +11,7 @@ import java.util.List;
  */
 public interface progress {
     // 开始计时
-    void beginProgress(String key, long expireSeconds, long DurationHours);
+    void beginProgress(String key, long expireSeconds, long DurationHours, String ownerName, String customerName);
 
     // 计时清零
     void setZeroProgress(String key);
@@ -38,4 +38,10 @@ public interface progress {
     String getMvName(HttpSession session);
 
     String getUrl(String MvNum);
+
+    String sync(String roomNum);
+
+    String delRoomByName(String ownerName);
+
+    int addMv(String movieName, String url);
 }

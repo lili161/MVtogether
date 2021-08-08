@@ -9,6 +9,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import javax.servlet.http.HttpSession;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author LR
@@ -54,14 +56,8 @@ public class indexController {
       // 查询是房主 还是 客人 之后返回响应的房间
       Viewer viewer = (Viewer) session.getAttribute(Constant.roomInfo);
       session.setAttribute(Constant.MovieName, progress.getMvName(session));
-      String roomNum = "room" + viewer.getMvNum();
-      String mvName = roomNum + "MvNum";
-      if (null == redisUtils.get(roomNum)) {
-          redisUtils.set(roomNum, 0);
-      }
-      if (null == redisUtils.get(mvName)) {
-          redisUtils.set(mvName, viewer.getMvNum());
-      }
+      String redisRoomNum = "room" + viewer.getRoomNum();
+      redisUtils.set(redisRoomNum, new Date().toString(), 1L, TimeUnit.DAYS);
       apisController.sessionAddUrl(session);
       if (viewer.getIsOwner() == 1) {
           return "main/ownerWatch";
@@ -86,13 +82,29 @@ public class indexController {
     return "main/waitFriend";
   }
 
-  @GetMapping("/choose")
-  public String chooseMv() {
-    return "main/chooseMv";
-  }
+    /*选电影*/
+    @GetMapping("/choose")
+    public String chooseMv() {
+        return "main/chooseMv";
+    }
 
-  @GetMapping("/go")
-  public String go() {
-    return "main/test";
-  }
+    /*不看了*/
+    @GetMapping("/go")
+    public String go(HttpSession session) {
+        Viewer viewer = (Viewer) session.getAttribute(Constant.roomInfo);
+        String ownerName = viewer.getOwnerName();
+        String customerName = viewer.getCustomerName();
+        String redisRoomNum = "room" + viewer.getRoomNum();
+        /*用房主的名字删除房间*/
+        progress.delRoomByName(ownerName);
+        redisUtils.remove(redisRoomNum);
+        session.invalidate();
+        return "main/index";
+    }
+
+    /*上传文件*/
+    @GetMapping("/upload")
+    public String upload() {
+        return "main/upload";
+    }
 }

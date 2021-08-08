@@ -18,7 +18,7 @@ class RedisUtilsTest {
 
   @Test
   void increasePerSecond() {
-    redisUtils.increasePerSecond("second", 1000, 14400);
+    redisUtils.increasePerSecond("second", 1000, 14400, "刘能", "赵四");
   }
 
   @Test
@@ -36,6 +36,7 @@ class RedisUtilsTest {
   @Test
   void del() {
     redisUtils.remove("刘能");
-    redisUtils.remove("赵四");
+      redisUtils.remove("赵四");
+      redisUtils.remove("room1002");
   }
 }

@@ -21,27 +21,27 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Configuration
 @EnableCaching
 
-public class RedisConfig extends CachingConfigurerSupport{
-    @Value("${spring.redis.host}")
-    private String host;
-    @Value("${spring.redis.port}")
-    private int port;
-    @Value("${spring.redis.timeout}")
-    private int timeout;
-    @Value("${spring.redis.password}")
-    private String password;
-    @Value("${spring.redis.pool.max-active}")
-    private int maxActive;
-    @Value("${spring.redis.pool.max-wait}")
-    private int maxWait;
-    @Value("${spring.redis.pool.max-idle}")
-    private int maxIdle;
-    @Value("${spring.redis.pool.min-idle}")
-    private int minIdle;
+public class RedisConfig extends CachingConfigurerSupport {
+    //    @Value("${spring.redis.host}")
+    private String host = "127.0.0.1";
+    //    @Value("${spring.redis.port}")
+    private int port = 6379;
+    //    @Value("${spring.redis.timeout}")
+    private int timeout = 30000;
+    //    @Value("${spring.redis.password}")
+    private String password = "";
+    //    @Value("${spring.redis.pool.max-active}")
+    private int maxActive = 8;
+    //    @Value("${spring.redis.pool.max-wait}")
+    private int maxWait = -1;
+    //    @Value("${spring.redis.pool.max-idle}")
+    private int maxIdle = 8;
+    //    @Value("${spring.redis.pool.min-idle}")
+    private int minIdle = 0;
 
 
     @Bean
-    public KeyGenerator wiselyKeyGenerator(){
+    public KeyGenerator wiselyKeyGenerator() {
         return new KeyGenerator() {
             @Override
             public Object generate(Object target, Method method, Object... params) {
